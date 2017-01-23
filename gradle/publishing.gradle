@@ -1,0 +1,167 @@
+/**
+ * provides the following gradle tasks
+ * - uploadArchives for local publishing on own machine
+ * - bintrayUpload for public publishing on bintray maven repository
+ *
+ * !!! root build.gralde must contain !!!
+ * plugins {
+ *   id "com.jfrog.bintray" version "1.7"
+ * }
+ */
+apply plugin: "maven"
+apply plugin: "maven-publish"
+apply plugin: "com.jfrog.bintray"
+
+/**
+ * configuration
+ */
+
+def _groupId = "de.sandstorm.junit"
+def _name = rootProject.name
+def _artifactId = rootProject.name
+def _description = "Small library to assert the content of nested data model making tests easy to write, read, maintain and fix."
+def _homePage = "https://github.com/sandstorm/nested-model-assertion-matchers"
+def _publicGitUrl = "https://github.com/sandstorm/nested-model-assertion-matchers.git"
+def _labels = ["java", "dev", "development", "testing", "junit", "unit", "assertion", "assert", "hamcrest", "matchers"]
+
+/**
+ * end of configuration
+ */
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = "sources"
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+def _execute = { command ->
+    def process = command.execute()
+    process.waitFor()
+    if (process.exitValue() != 0) {
+        throw new IllegalStateException("exit value != 0: ${process.err.text}")
+    }
+    return process.in.text.trim()
+}
+
+def _version = _execute("git describe --abbrev=0 --tags") ?: "HEAD"
+if (_execute("git rev-list ${_version}..HEAD --count") != "0") {
+    _version = "master"
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId _groupId
+            artifactId _artifactId
+            version _version
+
+            from components.java
+            artifact sourcesJar {
+                classifier "sources"
+            }
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+
+            pom.withXml {
+                asNode().children().last() + {
+                    def builder = delegate
+
+                    builder.name _name
+                    builder.description _description
+                    builder.url _homePage
+
+                    builder.licenses {
+                        builder.license {
+                            builder.name "The MIT License (MIT)"
+                            builder.url "https://opensource.org/licenses/MIT"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+def _localRepository = "file://localhost/tmp/mavenRepository/"
+task uploadArchives_printHelp << {
+    description "Prints an example how to use the local maven repository."
+    println """\u001B[32m
+        How to use local artifact in gradle project?
+        \u001B[33m
+        repositories {
+            maven {
+                url "${_localRepository}"
+            }
+        }
+        dependencies {
+            testCompile '${_groupId}:${_artifactId}:${_version}'
+        }
+        \u001B[0m
+    """
+}
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: _localRepository)
+            pom.groupId = _groupId
+            pom.artifactId = _artifactId
+            pom.version = _version
+        }
+    }
+}
+uploadArchives.dependsOn uploadArchives_printHelp
+
+task bintray_printHelp << {
+    description "Prints an example how to use the public maven repository."
+    println """\u001B[32m
+        How to use published artifact in gradle project?
+        \u001B[33m
+        repositories {
+            maven {
+                url "https://dl.bintray.com/sandstorm/maven"
+            }
+        }
+        dependencies {
+            testCompile '${_groupId}:${_artifactId}:${_version}'
+        }
+        \u001B[0m
+    """
+}
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_KEY")
+    publications = ["maven"]
+
+    dryRun = false
+    publish = true
+    override = _version == "master"
+
+    pkg {
+        name = _name
+        desc = _description
+
+        repo = "maven"
+        websiteUrl = _homePage
+        licenses = ["MIT"]
+        vcsUrl = _publicGitUrl
+        labels = _labels
+        publicDownloadNumbers = true
+
+        version {
+            name = _version
+            vcsTag = _version
+            released = new Date()
+        }
+    }
+}
+bintrayUpload.dependsOn bintray_printHelp

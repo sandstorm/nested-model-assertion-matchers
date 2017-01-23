@@ -1,0 +1,7 @@
+repositories {
+    maven {
+        url "https://dl.bintray.com/sandstorm/maven"
+    }
+    mavenCentral()
+    jcenter()
+}

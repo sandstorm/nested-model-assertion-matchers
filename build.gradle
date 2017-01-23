@@ -1,0 +1,25 @@
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+}
+
+apply plugin: "java"
+apply from: "${rootProject.projectDir}/gradle/junit.gradle"
+apply from: "${rootProject.projectDir}/gradle/repositories.gradle"
+apply from: "${rootProject.projectDir}/gradle/publishing.gradle"
+
+/**
+ * This is a configuration for IntelliJ to exclude some folders from the project.
+ *
+ * see http://www.gradle.org/docs/current/dsl/org.gradle.plugins.ide.idea.model.IdeaModule.html
+ */
+apply plugin: "idea"
+idea {
+    module {
+        excludeDirs += [
+            ".gradle",
+            ".idea",
+            "build",
+            "gradle/wrapper"
+        ].collect { file(it) }
+    }
+}
