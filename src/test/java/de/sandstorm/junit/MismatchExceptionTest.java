@@ -38,7 +38,7 @@ public class MismatchExceptionTest {
     public void getMessage_exception_during_comparison() {
         assertEquals(
             "incorrect message",
-            "incorrect 'long.path.to.error.0', here the test code crashed for some reason",
+            "incorrect 'long.path.to.error.0', java.lang.Exception: here the test code crashed for some reason",
             new MismatchException("long",
                 new MismatchException("path",
                     new MismatchException("to",

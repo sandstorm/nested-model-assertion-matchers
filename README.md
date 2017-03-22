@@ -16,6 +16,19 @@ It make my tests easy to write, read, maintain and fix.
 
 # Quick start
 
+Add this library to your test dependencies.
+
+```
+repositories {
+  maven {
+    url "https://dl.bintray.com/sandstorm/maven"
+  }
+}
+dependencies {
+  testCompile 'de.sandstorm.junit:nested-model-assertion-matchers:1.0.1'
+}
+```
+
 1. create a `Matcher` to validate your model (mirror the class hierarchy of the model in the matchers)
 2. write a unit test
 
