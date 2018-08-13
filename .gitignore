@@ -4,3 +4,7 @@
 /gradle/wrapper/
 /gradlew
 /gradlew.bat
+**/*.iml
+**/*.iws
+**/*.ipr
+/out/

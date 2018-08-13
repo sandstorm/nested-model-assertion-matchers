@@ -83,6 +83,18 @@ public class AbstractTypeSafeMatcherTest {
         }
     }
 
+    /* TODO: known issue @Test
+    public void validate_green_useBaseTypeForTypeValidation() throws Throwable {
+        final AbstractTypeSafeMatcher<List<String>> matcher = new AbstractTypeSafeMatcher<>(new ArrayList<>(0)) {
+            @Override
+            protected void typeSafeValidate(List<String> expected, List<String> actual) throws Throwable {
+                // good enough for this test case
+                assertEquals("incorrect size", expected.size(), actual.size());
+            }
+        };
+        matcher.validate(new LinkedList<String>());
+    }*/
+
     private static class TestEntity {
         private final String name;
         private final int age;

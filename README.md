@@ -102,3 +102,11 @@ Sure, but they have their downsides. I used them a lot before switching to this 
 ## Can't I just implement it myself
 
 You can use this library for free. If a feature is missing, please consider to create a [Pull Request](https://help.github.com/articles/about-pull-requests/).
+
+## How can I start developing this library?
+
+```sh
+git clone git@github.com:sandstorm/nested-model-assertion-matchers.git
+gradle wrapper
+./gradlew test
+```
